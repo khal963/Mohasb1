@@ -1,0 +1,6 @@
+{
+  "name": "محاسبتي",
+  "description": "تطبيق هاتف محمول حديث وبسيط لإدارة المصروفات والمحاسبة الشخصية مع دعم كامل للغة العربية والوضع الداكن والفاتح وإدارة العملات والديون والتقارير والنسخ الاحتياطي.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
