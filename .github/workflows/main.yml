@@ -21,23 +21,20 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          api-level: 36
+          build-tools: 36.0.0
 
       - name: Create dummy files
         run: |
           touch .env
           mkdir -p app/src/main/java/com/aistudio/mohasabaty/fintech
 
-      - name: Make gradlew executable
-        run: |
-          if [ -f gradlew ]; then chmod +x gradlew; fi
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Build Debug APK with Gradle
-        run: |
-          if [ -f gradlew ]; then
-            ./gradlew assembleDebug
-          else
-            gradle assembleDebug
-          fi
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
