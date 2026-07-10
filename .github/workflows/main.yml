@@ -19,16 +19,25 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Create dummy files
         run: |
           touch .env
           mkdir -p app/src/main/java/com/aistudio/mohasabaty/fintech
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      - name: Make gradlew executable
+        run: |
+          if [ -f gradlew ]; then chmod +x gradlew; fi
+
+      - name: Build Debug APK with Gradle
+        run: |
+          if [ -f gradlew ]; then
+            ./gradlew assembleDebug
+          else
+            gradle assembleDebug
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
