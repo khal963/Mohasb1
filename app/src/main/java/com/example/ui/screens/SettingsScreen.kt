@@ -315,6 +315,109 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
                             )
                         }
                     }
+
+                    if (settings.isAppLocked) {
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Switch(
+                                checked = settings.isBiometricEnabled,
+                                onCheckedChange = { viewModel.setBiometricEnabled(it) }
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(
+                                        text = "تفعيل بصمة الإصبع",
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                                    )
+                                    Text(
+                                        text = "استخدام البصمة لفتح التطبيق بسرعة",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color.Gray
+                                    )
+                                }
+                                Icon(imageVector = Icons.Default.Fingerprint, contentDescription = "Biometric Lock")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 5b. Reset balances to zero
+        item {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "إدارة البيانات والتهيئة",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Right
+                    )
+
+                    var showResetConfirm by remember { mutableStateOf(false) }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(
+                            onClick = { showResetConfirm = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Text("تصفير جميع الأرصدة")
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = "تصفير أرصدة المحافظ",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                            Text(
+                                text = "إعادة جميع أرصدة المحافظ إلى الصفر (0)",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+
+                    if (showResetConfirm) {
+                        AlertDialog(
+                            onDismissRequest = { showResetConfirm = false },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        viewModel.resetAllBalancesToZero()
+                                        showResetConfirm = false
+                                        Toast.makeText(context, "تم تصفير جميع الأرصدة بنجاح", Toast.LENGTH_SHORT).show()
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                                ) {
+                                    Text("نعم، صفر الأرصدة")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showResetConfirm = false }) {
+                                    Text("إلغاء")
+                                }
+                            },
+                            title = { Text("تأكيد تصفير الأرصدة", textAlign = TextAlign.Right, modifier = Modifier.fillMaxWidth()) },
+                            text = { Text("هل أنت متأكد من رغبتك في تصفير جميع الأرصدة لجميع المحافظ؟ لا يمكن التراجع عن هذه العملية.", textAlign = TextAlign.Right, modifier = Modifier.fillMaxWidth()) }
+                        )
+                    }
                 }
             }
         }

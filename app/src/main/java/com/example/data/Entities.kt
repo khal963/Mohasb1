@@ -78,5 +78,6 @@ data class CurrencySetting(
     val usdToSyp: Double = 15000.0,
     val isAppLocked: Boolean = false,
     val appPin: String = "",
+    val isBiometricEnabled: Boolean = false,
     val language: String = "AR" // "AR" or "EN"
 )

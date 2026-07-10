@@ -46,9 +46,9 @@ class FinanceRepository(private val db: AppDatabase) {
         // Initialize wallets if empty
         val currentWallets = db.walletDao().getAllWallets().firstOrNull() ?: emptyList()
         if (currentWallets.isEmpty()) {
-            db.walletDao().insertWallet(Wallet(name = "محفظة الدولار", color = 0xFF2196F3.toInt(), iconName = "wallet", balance = 1000.0, currency = "USD"))
-            db.walletDao().insertWallet(Wallet(name = "محفظة التركي", color = 0xFF4CAF50.toInt(), iconName = "wallet", balance = 5000.0, currency = "TRY"))
-            db.walletDao().insertWallet(Wallet(name = "محفظة السوري", color = 0xFFFF9800.toInt(), iconName = "wallet", balance = 100000.0, currency = "SYP"))
+            db.walletDao().insertWallet(Wallet(name = "محفظة الدولار", color = 0xFF2196F3.toInt(), iconName = "wallet", balance = 0.0, currency = "USD"))
+            db.walletDao().insertWallet(Wallet(name = "محفظة التركي", color = 0xFF4CAF50.toInt(), iconName = "wallet", balance = 0.0, currency = "TRY"))
+            db.walletDao().insertWallet(Wallet(name = "محفظة السوري", color = 0xFFFF9800.toInt(), iconName = "wallet", balance = 0.0, currency = "SYP"))
         }
     }
 

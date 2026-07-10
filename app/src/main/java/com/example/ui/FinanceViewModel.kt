@@ -333,6 +333,26 @@ class FinanceViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun setBiometricEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            val current = settings.value
+            repository.updateSettings(
+                current.copy(
+                    isBiometricEnabled = enabled
+                )
+            )
+        }
+    }
+
+    fun resetAllBalancesToZero() {
+        viewModelScope.launch {
+            val currentWallets = wallets.value
+            for (w in currentWallets) {
+                repository.updateWallet(w.copy(balance = 0.0))
+            }
+        }
+    }
+
     // Export Reports to CSV
     fun exportReport(context: Context, periodType: String): Uri? {
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())

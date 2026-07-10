@@ -5,6 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.fragment.app.FragmentActivity
+import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricManager
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -22,9 +26,46 @@ import com.example.ui.FinanceViewModel
 import com.example.ui.screens.*
 import com.example.ui.theme.MyApplicationTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     private val viewModel: FinanceViewModel by viewModels()
+
+    fun showBiometricPrompt(
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val executor = ContextCompat.getMainExecutor(this)
+        val biometricPrompt = BiometricPrompt(this, executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                    onError(errString.toString())
+                }
+
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    onSuccess()
+                }
+
+                override fun onAuthenticationFailed() {
+                    super.onAuthenticationFailed()
+                    onError("بصمة غير مطابقة")
+                }
+            })
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("تأكيد الهوية")
+            .setSubtitle("استخدم بصمة الإصبع لفتح تطبيق محاسبتي")
+            .setNegativeButtonText("إلغاء")
+            .build()
+
+        biometricPrompt.authenticate(promptInfo)
+    }
+
+    fun canUseBiometric(): Boolean {
+        val biometricManager = BiometricManager.from(this)
+        return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS
+    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +93,14 @@ class MainActivity : ComponentActivity() {
                 if (settings.isAppLocked && !isUnlocked) {
                     LockScreen(
                         correctPin = settings.appPin,
+                        isBiometricEnabled = settings.isBiometricEnabled,
+                        canUseBiometric = canUseBiometric(),
+                        onTriggerBiometric = { onErrorCallback ->
+                            showBiometricPrompt(
+                                onSuccess = { isUnlocked = true },
+                                onError = { errorMsg -> onErrorCallback(errorMsg) }
+                            )
+                        },
                         onUnlocked = { isUnlocked = true }
                     )
                 } else {
@@ -107,39 +156,6 @@ fun MainScreenContent(viewModel: FinanceViewModel) {
                         fontSize = 20.sp,
                         color = MaterialTheme.colorScheme.primary
                     )
-                },
-                actions = {
-                    // Currency quick switcher
-                    Row(
-                        modifier = Modifier.padding(end = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "العملة:",
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(end = 4.dp)
-                        )
-                        var expanded by remember { mutableStateOf(false) }
-                        AssistChip(
-                            onClick = { expanded = true },
-                            label = { Text(displayCurrency) },
-                            trailingIcon = { Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Dropdown") }
-                        )
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            listOf("USD", "TRY", "SYP").forEach { cur ->
-                                DropdownMenuItem(
-                                    text = { Text(cur) },
-                                    onClick = {
-                                        viewModel.setDisplayCurrency(cur)
-                                        expanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background

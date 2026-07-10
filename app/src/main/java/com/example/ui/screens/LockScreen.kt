@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Backspace
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,10 +23,21 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun LockScreen(
     correctPin: String,
+    isBiometricEnabled: Boolean = false,
+    canUseBiometric: Boolean = false,
+    onTriggerBiometric: ((String) -> Unit) -> Unit = {},
     onUnlocked: () -> Unit
 ) {
     var enteredPin by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        if (isBiometricEnabled && canUseBiometric) {
+            onTriggerBiometric { error ->
+                errorMessage = error
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -78,6 +90,28 @@ fun LockScreen(
             }
         }
 
+        if (isBiometricEnabled && canUseBiometric) {
+            Spacer(modifier = Modifier.height(16.dp))
+            IconButton(
+                onClick = {
+                    onTriggerBiometric { error ->
+                        errorMessage = error
+                    }
+                },
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Fingerprint,
+                    contentDescription = "بصمة الإصبع",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
+
         if (errorMessage.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -87,7 +121,7 @@ fun LockScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
         // Numeric keyboard grid
         val keys = listOf(
